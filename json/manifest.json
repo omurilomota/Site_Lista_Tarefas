@@ -1,0 +1,21 @@
+{
+  "short_name": "Tarefas",
+  "name": "Minha Lista de Tarefas",
+  "icons": [
+    {
+      "src": "icone-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icone-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./",
+  "background_color": "#000000",
+  "display": "standalone",
+  "scope": "./",
+  "theme_color": "#000000"
+}

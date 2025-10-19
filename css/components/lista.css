@@ -1,0 +1,98 @@
+#lista-tarefas {
+    list-style: none;
+}
+
+#lista-tarefas li {
+    padding: 12px;
+    margin: 8px 0;
+    background-color: #222;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    border-left: 4px solid #555;
+}
+
+#lista-tarefas li[data-categoria="Pessoal"] { border-left-color: #9C27B0; }
+#lista-tarefas li[data-categoria="Trabalho"] { border-left-color: #FF9800; }
+#lista-tarefas li[data-categoria="Estudos"] { border-left-color: #2196F3; }
+#lista-tarefas li.dragging {
+    opacity: 0.4;
+}
+
+#lista-tarefas li[data-status="pendente"] {
+    border-left-color: #FFC107;
+}
+
+#lista-tarefas li[data-status="em andamento"] {
+    border-left-color: #2196F3;
+}
+
+#lista-tarefas li[data-status="concluída"] {
+    border-left-color: #4CAF50;
+    opacity: 0.7;
+    text-decoration: line-through;
+}
+
+#lista-tarefas li span {
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#lista-tarefas li span:hover {
+    text-decoration: underline;
+}
+
+#lista-tarefas li select {
+    padding: 4px;
+    border-radius: 4px;
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+}
+
+#lista-tarefas li button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#lista-tarefas li button:hover {
+    background-color: #d32f2f;
+}
+
+footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    color: #aaa;
+    font-size: 14px;
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+    .tarefas {
+        padding: 10px;
+    }
+
+    .input-container {
+        flex-direction: column;
+    }
+
+    #input-tarefa, #btn-adicionar {
+        width: 100%;
+    }
+
+    .filtros {
+        flex-direction: column;
+    }
+
+    .filtros button {
+        width: 100%;
+    }
+}

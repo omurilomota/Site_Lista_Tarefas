@@ -1,0 +1,33 @@
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.input-container label {
+    font-weight: bold;
+}
+
+#input-tarefa {
+    padding: 10px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background-color: #222;
+    color: white;
+    font-size: 16px;
+}
+
+#btn-adicionar {
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#btn-adicionar:hover {
+    background-color: #45a049;
+}
