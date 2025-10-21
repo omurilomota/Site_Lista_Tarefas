@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de tarefas</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="json/manifest.json">
+</head>
+<body>
+    <div class="container">
+        <h1>Lista de Tarefas</h1>
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Adicione uma nova tarefa...">
+            <button id="addTaskButton">Adicionar</button>
+        </div>
+
+        <div class="filtros" id="filtro">
+            <button id="allTasks">Todas</button>
+            <button id="completedTasks">Completas</button>
+            <button id="pendingTasks">Pendentes</button>
+        </div>
+        <ul id="taskList"></ul>
+    </div>      
+
+    <div class="limparBotão"  id="clearTasksButton">
+        
+        <button>Limpar Tarefas Completas</button>
+
+    </div>
+    <footer>
+        <p>&copy; 2024 Lista de Tarefas. Todos os direitos reservados.</p>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+</html>

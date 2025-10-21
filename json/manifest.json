@@ -1,21 +1,21 @@
 {
+  "name": "Lista de Tarefas",
   "short_name": "Tarefas",
-  "name": "Minha Lista de Tarefas",
+  "description": "Aplicativo simples de lista de tarefas offline-first.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
   "icons": [
     {
-      "src": "icone-192.png",
-      "type": "image/png",
-      "sizes": "192x192"
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
     },
     {
-      "src": "icone-512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
-  ],
-  "start_url": "./",
-  "background_color": "#000000",
-  "display": "standalone",
-  "scope": "./",
-  "theme_color": "#000000"
+  ]
 }
