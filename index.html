@@ -1,36 +1,322 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de tarefas</title>
+    <title>TaskFlow | Lista de Tarefas Inteligente</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="manifest" href="json/manifest.json">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
 </head>
-<body>
-    <div class="container">
-        <h1>Lista de Tarefas</h1>
-        <div class="input-group">
-            <input type="text" id="taskInput" placeholder="Adicione uma nova tarefa...">
-            <button id="addTaskButton">Adicionar</button>
+<body class="light-theme">
+    <div class="app-container">
+        <!-- Cabeçalho -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <i class="fas fa-tasks logo-icon"></i>
+                    <h1>TaskFlow</h1>
+                    <span class="tagline">Produtividade Inteligente</span>
+                </div>
+                
+                <div class="header-controls">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar tarefas...">
+                    </div>
+                    
+                    <div class="theme-toggle">
+                        <label class="switch">
+                            <input type="checkbox" id="themeToggle">
+                            <span class="slider">
+                                <i class="fas fa-sun"></i>
+                                <i class="fas fa-moon"></i>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <button id="statsButton" class="icon-button" title="Estatísticas">
+                        <i class="fas fa-chart-bar"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-info">
+                    <span>Progresso do dia</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <div class="task-input-section">
+                <div class="input-with-category">
+                    <input type="text" id="taskInput" placeholder="O que precisa ser feito?">
+                    
+                    <select id="taskCategory">
+                        <option value="general">📋 Geral</option>
+                        <option value="work">💼 Trabalho</option>
+                        <option value="personal">👤 Pessoal</option>
+                        <option value="shopping">🛒 Compras</option>
+                        <option value="health">🏃 Saúde</option>
+                        <option value="study">📚 Estudo</option>
+                    </select>
+                    
+                    <div class="priority-selector">
+                        <button class="priority-btn" data-priority="low" title="Baixa Prioridade">
+                            <i class="fas fa-arrow-down"></i>
+                        </button>
+                        <button class="priority-btn active" data-priority="medium" title="Média Prioridade">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <button class="priority-btn" data-priority="high" title="Alta Prioridade">
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                    </div>
+                    
+                    <button id="addTaskButton" class="add-task-btn">
+                        <i class="fas fa-plus"></i> Adicionar
+                    </button>
+                </div>
+                
+                <div class="task-options">
+                    <input type="date" id="taskDueDate" title="Data de Vencimento">
+                    <button id="addQuickTask" class="quick-task-btn">
+                        <i class="fas fa-bolt"></i> Tarefa Rápida
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtros e Controles -->
+            <div class="controls-section">
+                <div class="filters">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fas fa-list"></i> Todas
+                    </button>
+                    <button class="filter-btn" data-filter="pending">
+                        <i class="fas fa-clock"></i> Pendentes
+                    </button>
+                    <button class="filter-btn" data-filter="completed">
+                        <i class="fas fa-check-circle"></i> Completas
+                    </button>
+                    <button class="filter-btn" data-filter="today">
+                        <i class="fas fa-calendar-day"></i> Hoje
+                    </button>
+                    <button class="filter-btn" data-filter="high">
+                        <i class="fas fa-exclamation-circle"></i> Prioridade Alta
+                    </button>
+                </div>
+                
+                <div class="sort-options">
+                    <select id="sortTasks">
+                        <option value="added">Ordenar por: Data de Adição</option>
+                        <option value="due">Ordenar por: Data de Vencimento</option>
+                        <option value="priority">Ordenar por: Prioridade</option>
+                        <option value="alphabetical">Ordenar por: Alfabética</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Lista de Tarefas -->
+            <div class="tasks-container">
+                <div class="tasks-header">
+                    <h2><i class="fas fa-tasks"></i> Suas Tarefas</h2>
+                    <span class="task-count" id="taskCount">0 tarefas</span>
+                </div>
+                
+                <ul id="taskList" class="task-list">
+                    <!-- Tarefas serão inseridas aqui dinamicamente -->
+                    <li class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>Nenhuma tarefa ainda</h3>
+                        <p>Adicione sua primeira tarefa acima para começar!</p>
+                    </li>
+                </ul>
+                
+                <!-- Painel de Estatísticas -->
+                <div id="statsPanel" class="stats-panel hidden">
+                    <div class="stats-header">
+                        <h3><i class="fas fa-chart-pie"></i> Estatísticas</h3>
+                        <button id="closeStats" class="close-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalTasks">0</div>
+                            <div class="stat-label">Total de Tarefas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="completedTasks">0</div>
+                            <div class="stat-label">Completas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="pendingTasks">0</div>
+                            <div class="stat-label">Pendentes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="highPriorityTasks">0</div>
+                            <div class="stat-label">Alta Prioridade</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-chart">
+                        <canvas id="tasksChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações em Massa -->
+            <div class="bulk-actions">
+                <div class="bulk-controls">
+                    <button id="selectAllTasks" class="select-all-btn">
+                        <i class="fas fa-check-square"></i> Selecionar Tudo
+                    </button>
+                    
+                    <div class="bulk-buttons">
+                        <button id="clearCompletedButton" class="danger-btn">
+                            <i class="fas fa-trash"></i> Limpar Completas
+                        </button>
+                        
+                        <button id="exportTasksButton" class="secondary-btn">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                        
+                        <button id="importTasksButton" class="secondary-btn">
+                            <i class="fas fa-upload"></i> Importar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="save-notice" id="saveNotice">
+                    <i class="fas fa-save"></i> Alterações salvas automaticamente
+                </div>
+            </div>
+        </main>
+
+        <!-- Rodapé -->
+        <footer class="app-footer">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p><i class="fas fa-code"></i> Desenvolvido com <i class="fas fa-heart"></i> para aumentar sua produtividade</p>
+                    <p class="app-version">TaskFlow v2.0 | Offline-First PWA</p>
+                </div>
+                
+                <div class="footer-links">
+                    <button id="keyboardShortcutsBtn" class="footer-link">
+                        <i class="fas fa-keyboard"></i> Atalhos
+                    </button>
+                    <button id="aboutBtn" class="footer-link">
+                        <i class="fas fa-info-circle"></i> Sobre
+                    </button>
+                    <button id="resetAppBtn" class="footer-link">
+                        <i class="fas fa-redo"></i> Resetar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="connection-status">
+                <span id="connectionStatus">
+                    <i class="fas fa-wifi"></i> Online
+                </span>
+                <span class="last-sync" id="lastSync">Última sincronização: Agora mesmo</span>
+            </div>
+        </footer>
+
+        <!-- Modal de Atalhos -->
+        <div id="shortcutsModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-keyboard"></i> Atalhos do Teclado</h3>
+                    <button class="modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="shortcuts-grid">
+                        <div class="shortcut-item">
+                            <kbd>Enter</kbd>
+                            <span>Adicionar tarefa</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>Enter</kbd>
+                            <span>Tarefa rápida</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Delete</kbd>
+                            <span>Remover tarefa selecionada</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Espaço</kbd>
+                            <span>Marcar/desmarcar tarefa</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>F</kbd>
+                            <span>Focar na busca</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Escape</kbd>
+                            <span>Limpar busca/seleção</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="filtros" id="filtro">
-            <button id="allTasks">Todas</button>
-            <button id="completedTasks">Completas</button>
-            <button id="pendingTasks">Pendentes</button>
+        <!-- Modal de Sobre -->
+        <div id="aboutModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-info-circle"></i> Sobre o TaskFlow</h3>
+                    <button class="modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="about-content">
+                        <div class="app-logo-large">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <p>TaskFlow é um aplicativo de lista de tarefas avançado com foco em produtividade e experiência do usuário.</p>
+                        
+                        <h4>Recursos Principais:</h4>
+                        <ul class="feature-list">
+                            <li><i class="fas fa-check-circle"></i> Funciona completamente offline</li>
+                            <li><i class="fas fa-check-circle"></i> Sincronização automática</li>
+                            <li><i class="fas fa-check-circle"></i> Prioridades e categorias</li>
+                            <li><i class="fas fa-check-circle"></i> Estatísticas visuais</li>
+                            <li><i class="fas fa-check-circle"></i> Temas claro/escuro</li>
+                            <li><i class="fas fa-check-circle"></i> Atalhos de teclado</li>
+                        </ul>
+                        
+                        <div class="tech-used">
+                            <h4>Tecnologias utilizadas:</h4>
+                            <div class="tech-icons">
+                                <span class="tech-icon">HTML5</span>
+                                <span class="tech-icon">CSS3</span>
+                                <span class="tech-icon">JavaScript</span>
+                                <span class="tech-icon">PWA</span>
+                                <span class="tech-icon">LocalStorage</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <ul id="taskList"></ul>
-    </div>      
 
-    <div class="limparBotão"  id="clearTasksButton">
-        
-        <button>Limpar Tarefas Completas</button>
-
+        <!-- Notificações Toast -->
+        <div id="toastContainer" class="toast-container"></div>
     </div>
-    <footer>
-        <p>&copy; 2024 Lista de Tarefas. Todos os direitos reservados.</p>
-    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
