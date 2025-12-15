@@ -22,6 +22,7 @@ class TaskFlowApp {
         this.setupDate();
         this.setupKeyboardShortcuts();
         this.setupDragAndDrop();
+        this.setupReminderChecker();
     }
     
     cacheElements() {
@@ -31,6 +32,7 @@ class TaskFlowApp {
             taskInput: document.getElementById('taskInput'),
             taskCategory: document.getElementById('taskCategory'),
             taskDueDate: document.getElementById('taskDueDate'),
+            taskReminderTime: document.getElementById('taskReminderTime'),
             searchInput: document.getElementById('searchInput'),
             sortTasks: document.getElementById('sortTasks'),
             
@@ -170,6 +172,7 @@ class TaskFlowApp {
             category: this.elements.taskCategory.value,
             priority: this.currentPriority,
             dueDate: this.elements.taskDueDate.value || null,
+            reminderTime: this.elements.taskReminderTime.value || null,
             completed: false,
             createdAt: new Date().toISOString(),
             completedAt: null
@@ -351,7 +354,6 @@ class TaskFlowApp {
         
         li.innerHTML = `
             <div class="task-checkbox ${task.completed ? 'checked' : ''}" data-id="${task.id}">
-                ${task.completed ? '✓' : ''}
             </div>
             <div class="task-content">
                 <div class="task-text ${task.completed ? 'completed' : ''}">
@@ -365,6 +367,12 @@ class TaskFlowApp {
                         <span class="task-due-date ${dueDateStatus}">
                             <i class="far fa-calendar"></i>
                             ${this.formatDate(task.dueDate)}
+                        </span>
+                    ` : ''}
+                    ${task.reminderTime ? `
+                        <span class="task-reminder" title="Lembrete definido para ${task.reminderTime}">
+                            <i class="far fa-bell"></i>
+                            ${task.reminderTime}
                         </span>
                     ` : ''}
                     <span class="badge badge-${priorityColors[task.priority]}">
@@ -881,7 +889,74 @@ class TaskFlowApp {
     }
     
     // ===== UTILITÁRIOS =====
-    
+
+    // ===== LEMBRETES =====
+
+    checkReminders() {
+        const tasks = this.getTasks();
+        const now = new Date();
+        const currentTime = now.toTimeString().substring(0, 5); // HH:MM format
+        const today = now.toISOString().split('T')[0];
+
+        tasks.forEach(task => {
+            if (!task.completed && task.dueDate && task.reminderTime) {
+                if (task.dueDate === today && task.reminderTime === currentTime) {
+                    this.showTaskReminder(task);
+                }
+            }
+        });
+    }
+
+    showTaskReminder(task) {
+        // Check if notifications are supported and enabled
+        if ('Notification' in window) {
+            if (Notification.permission === 'granted') {
+                this.displayNotification(task);
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        this.displayNotification(task);
+                    }
+                });
+            }
+        }
+
+        // Fallback to toast notification if browser notification is not granted
+        this.showToast(`Lembrete: ${task.text}`, 'info');
+    }
+
+    displayNotification(task) {
+        const notification = new Notification('Lembrete de Tarefa', {
+            body: task.text,
+            icon: 'icons/icon-192.png',
+            badge: 'icons/icon-72.png',
+            tag: task.id
+        });
+
+        // Close notification after 10 seconds
+        setTimeout(() => {
+            if (notification) {
+                notification.close();
+            }
+        }, 10000);
+
+        // Open task app when notification is clicked
+        notification.onclick = () => {
+            window.focus();
+            notification.close();
+        };
+    }
+
+    setupReminderChecker() {
+        // Check for reminders every minute
+        setInterval(() => {
+            this.checkReminders();
+        }, 60000); // Check every minute
+
+        // Initial check
+        this.checkReminders();
+    }
+
     getCategoryName(categoryKey) {
         const categories = {
             'general': 'Geral',

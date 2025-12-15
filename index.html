@@ -59,26 +59,32 @@
             <div class="task-input-section">
                 <div class="input-with-category">
                     <input type="text" id="taskInput" placeholder="O que precisa ser feito?">
+
+                    <div class="category-container">
+                        <span class="priority-label">tipos :</span>
+                        <select id="taskCategory">
+                            <option value="general">📋 Geral</option>
+                            <option value="work">💼 Trabalho</option>
+                            <option value="personal">👤 Pessoal</option>
+                            <option value="shopping">🛒 Compras</option>
+                            <option value="health">🏃 Saúde</option>
+                            <option value="study">📚 Estudo</option>
+                        </select>
+                    </div>
                     
-                    <select id="taskCategory">
-                        <option value="general">📋 Geral</option>
-                        <option value="work">💼 Trabalho</option>
-                        <option value="personal">👤 Pessoal</option>
-                        <option value="shopping">🛒 Compras</option>
-                        <option value="health">🏃 Saúde</option>
-                        <option value="study">📚 Estudo</option>
-                    </select>
-                    
-                    <div class="priority-selector">
-                        <button class="priority-btn" data-priority="low" title="Baixa Prioridade">
-                            <i class="fas fa-arrow-down"></i>
-                        </button>
-                        <button class="priority-btn active" data-priority="medium" title="Média Prioridade">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <button class="priority-btn" data-priority="high" title="Alta Prioridade">
-                            <i class="fas fa-arrow-up"></i>
-                        </button>
+                    <div class="priority-container">
+                        <span class="priority-label">Prioridades:</span>
+                        <div class="priority-selector">
+                            <button class="priority-btn" data-priority="low" title="Baixa Prioridade">
+                                <i class="fas fa-arrow-down"></i>
+                            </button>
+                            <button class="priority-btn active" data-priority="medium" title="Média Prioridade">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button class="priority-btn" data-priority="high" title="Alta Prioridade">
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                        </div>
                     </div>
                     
                     <button id="addTaskButton" class="add-task-btn">
@@ -88,6 +94,7 @@
                 
                 <div class="task-options">
                     <input type="date" id="taskDueDate" title="Data de Vencimento">
+                    <input type="time" id="taskReminderTime" title="Horário do Lembrete">
                     <button id="addQuickTask" class="quick-task-btn">
                         <i class="fas fa-bolt"></i> Tarefa Rápida
                     </button>

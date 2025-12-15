@@ -128,7 +128,7 @@ self.addEventListener('push', event => {
       }
     ]
   };
-  
+
   event.waitUntil(
     self.registration.showNotification('TaskFlow', options)
   );
@@ -136,13 +136,14 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  
+
   if (event.action === 'open') {
     event.waitUntil(
       clients.openWindow('/')
     );
   }
 });
+
 
 // Função para sincronizar tarefas
 function syncTasks() {
