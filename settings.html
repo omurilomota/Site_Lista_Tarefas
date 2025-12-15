@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow | Configurações</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+    <style>
+        /* Estilos específicos para a página de configurações */
+        .settings-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: var(--bg-secondary);
+        }
+        
+        .settings-sidebar {
+            width: 280px;
+            background-color: var(--bg-primary);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .settings-sidebar h3 {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .settings-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .settings-menu li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .settings-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+        
+        .settings-menu a:hover,
+        .settings-menu a.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .settings-menu a i {
+            width: 20px;
+        }
+        
+        .settings-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .settings-header {
+            margin-bottom: 2rem;
+        }
+        
+        .settings-header h1 {
+            font-size: 1.8rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .settings-header p {
+            color: var(--text-secondary);
+        }
+        
+        .settings-section {
+            background-color: var(--bg-primary);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+        }
+        
+        .settings-section h2 {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-info {
+            flex: 1;
+        }
+        
+        .setting-info h3 {
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .setting-info p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .setting-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-color);
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .theme-select {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        
+        .btn-danger {
+            padding: 0.5rem 1rem;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-md);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .btn-danger:hover {
+            background: #c62828;
+        }
+        
+        .notification-settings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .notification-group {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            padding: 1rem;
+        }
+        
+        .notification-group h4 {
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .notification-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .notification-option:last-child {
+            margin-bottom: 0;
+        }
+        
+        .data-export {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .export-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+        }
+        
+        .security-action {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .security-btn {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all var(--transition-fast);
+        }
+        
+        .security-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        @media (max-width: 992px) {
+            .settings-container {
+                flex-direction: column;
+            }
+            
+            .settings-sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 1.5rem;
+            }
+            
+            .settings-content {
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .setting-control {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+    <script src="js/auth.js"></script>
+</head>
+<body class="light-theme">
+    <div class="settings-container">
+        <!-- Sidebar de configurações -->
+        <div class="settings-sidebar">
+            <h3>Configurações</h3>
+            <ul class="settings-menu">
+                <li><a href="profile.html"><i class="fas fa-user"></i> Perfil</a></li>
+                <li><a href="#" class="active"><i class="fas fa-cog"></i> Configurações</a></li>
+                <li><a href="#"><i class="fas fa-bell"></i> Notificações</a></li>
+                <li><a href="#"><i class="fas fa-shield-alt"></i> Segurança</a></li>
+                <li><a href="#"><i class="fas fa-history"></i> Histórico</a></li>
+                <li><a href="login.html"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+            </ul>
+        </div>
+        
+        <!-- Conteúdo das configurações -->
+        <div class="settings-content">
+            <div class="settings-header">
+                <h1>Configurações</h1>
+                <p>Personalize sua experiência no TaskFlow</p>
+            </div>
+            
+            <!-- Configurações de aparência -->
+            <div class="settings-section">
+                <h2><i class="fas fa-palette"></i> Aparência</h2>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Tema Escuro</h3>
+                        <p>Ative ou desative o modo escuro</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch">
+                            <input type="checkbox" id="darkThemeToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Tema Personalizado</h3>
+                        <p>Escolha cores personalizadas</p>
+                    </div>
+                    <div class="setting-control">
+                        <select class="theme-select" id="customThemeSelect">
+                            <option value="default">Padrão</option>
+                            <option value="blue">Azul</option>
+                            <option value="green">Verde</option>
+                            <option value="purple">Roxo</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Configurações de notificações -->
+            <div class="settings-section">
+                <h2><i class="fas fa-bell"></i> Notificações</h2>
+                
+                <div class="notification-settings">
+                    <div class="notification-group">
+                        <h4>Email</h4>
+                        <div class="notification-option">
+                            <span>Lembretes de tarefas</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="notification-option">
+                            <span>Resumo diário</span>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="notification-option">
+                            <span>Colaboração</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="notification-group">
+                        <h4>Desktop</h4>
+                        <div class="notification-option">
+                            <span>Notificações de tarefas</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="notification-option">
+                            <span>Notificações de lembretes</span>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Configurações de privacidade -->
+            <div class="settings-section">
+                <h2><i class="fas fa-lock"></i> Privacidade</h2>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Perfis Públicos</h3>
+                        <p>Permitir que outros usuários vejam seu perfil</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Descoberta</h3>
+                        <p>Permitir que seu perfil apareça em buscas</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Dados Pessoais</h3>
+                        <p>Controlar quais informações são compartilhadas</p>
+                    </div>
+                    <div class="setting-control">
+                        <button class="security-btn">
+                            <i class="fas fa-eye"></i> Visualizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Configurações de conta -->
+            <div class="settings-section">
+                <h2><i class="fas fa-user-cog"></i> Conta</h2>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Plano Atual</h3>
+                        <p>Premium - Renovação em 30 dias</p>
+                    </div>
+                    <div class="setting-control">
+                        <button class="security-btn">
+                            <i class="fas fa-edit"></i> Alterar Plano
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Exportar Dados</h3>
+                        <p>Baixar uma cópia de seus dados</p>
+                    </div>
+                    <div class="setting-control">
+                        <button class="security-btn">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Excluir Conta</h3>
+                        <p>Excluir permanentemente sua conta e dados</p>
+                    </div>
+                    <div class="setting-control">
+                        <button class="btn-danger">
+                            <i class="fas fa-trash-alt"></i> Excluir Conta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar eventos das configurações
+        document.addEventListener('DOMContentLoaded', function() {
+            // O script auth.js já inicializa as funcionalidades
+            // Aqui apenas adicionamos manipuladores específicos para esta página
+
+            // Carregar preferências salvas
+            const darkThemeToggle = document.getElementById('darkThemeToggle');
+            const customThemeSelect = document.getElementById('customThemeSelect');
+
+            if (darkThemeToggle) {
+                darkThemeToggle.checked = localStorage.getItem('darkTheme') === 'true';
+
+                darkThemeToggle.addEventListener('change', function() {
+                    taskFlowAuth.toggleTheme(this.checked);
+                });
+            }
+
+            if (customThemeSelect) {
+                customThemeSelect.value = localStorage.getItem('customTheme') || 'default';
+
+                customThemeSelect.addEventListener('change', function() {
+                    localStorage.setItem('customTheme', this.value);
+                    taskFlowAuth.showToast(`Tema alterado para: ${this.options[this.selectedIndex].text}`, 'info');
+                });
+            }
+
+            // Funções para os botões perigosos
+            document.querySelectorAll('.btn-danger').forEach(button => {
+                button.addEventListener('click', function() {
+                    if (confirm('Tem certeza que deseja excluir sua conta? Esta ação é permanente e não pode ser desfeita.')) {
+                        taskFlowAuth.showToast('Conta excluída. Em uma aplicação real, isso chamaria o backend.', 'success');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

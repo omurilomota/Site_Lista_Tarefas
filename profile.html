@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow | Perfil do Usuário</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+    <style>
+        /* Estilos específicos para a página de perfil */
+        .profile-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: var(--bg-secondary);
+        }
+        
+        .profile-sidebar {
+            width: 280px;
+            background-color: var(--bg-primary);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .profile-sidebar h3 {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .profile-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .profile-menu li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+        
+        .profile-menu a:hover,
+        .profile-menu a.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .profile-menu a i {
+            width: 20px;
+        }
+        
+        .profile-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1.5rem;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+            overflow: hidden;
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-info h1 {
+            font-size: 1.8rem;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .profile-info p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .profile-info-stats {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .profile-form {
+            background-color: var(--bg-primary);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        
+        .form-section h2 {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            flex: 1;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            font-size: 1rem;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.2);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .btn-save {
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .btn-save:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-cancel {
+            padding: 12px 24px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: none;
+            border-radius: var(--border-radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .btn-cancel:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .avatar-upload {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+        }
+        
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .avatar-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .avatar-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .avatar-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        @media (max-width: 992px) {
+            .profile-container {
+                flex-direction: column;
+            }
+            
+            .profile-sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 1.5rem;
+            }
+            
+            .profile-content {
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-info-stats {
+                justify-content: center;
+            }
+        }
+    </style>
+    <script src="js/auth.js"></script>
+</head>
+<body class="light-theme">
+    <div class="profile-container">
+        <!-- Sidebar do perfil -->
+        <div class="profile-sidebar">
+            <h3>Menu do Perfil</h3>
+            <ul class="profile-menu">
+                <li><a href="#" class="active"><i class="fas fa-user"></i> Perfil</a></li>
+                <li><a href="settings.html"><i class="fas fa-cog"></i> Configurações</a></li>
+                <li><a href="#"><i class="fas fa-bell"></i> Notificações</a></li>
+                <li><a href="#"><i class="fas fa-shield-alt"></i> Segurança</a></li>
+                <li><a href="#"><i class="fas fa-history"></i> Histórico</a></li>
+                <li><a href="login.html"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+            </ul>
+        </div>
+        
+        <!-- Conteúdo do perfil -->
+        <div class="profile-content">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="profile-info">
+                    <h1>João Silva</h1>
+                    <p>Plano Premium • joao.silva@example.com</p>
+                    <div class="profile-info-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">142</div>
+                            <div class="stat-label">Tarefas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">24</div>
+                            <div class="stat-label">Projetos</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">98%</div>
+                            <div class="stat-label">Eficiência</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-form">
+                <div class="form-section">
+                    <h2>Informações Pessoais</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">Primeiro Nome</label>
+                            <input type="text" id="firstName" value="João">
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Sobrenome</label>
+                            <input type="text" id="lastName" value="Silva">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" value="joao.silva@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="bio">Biografia</label>
+                        <textarea id="bio" placeholder="Fale um pouco sobre você...">Desenvolvedor apaixonado por produtividade e organização. Usando TaskFlow para manter minhas tarefas em dia.</textarea>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2>Imagem de Perfil</h2>
+                    <div class="avatar-upload">
+                        <div class="avatar-preview">
+                            <i class="fas fa-user" style="font-size: 2rem;"></i>
+                        </div>
+                        <div class="avatar-actions">
+                            <button class="avatar-btn" id="uploadAvatar">Carregar nova imagem</button>
+                            <button class="avatar-btn" id="removeAvatar">Remover imagem</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2>Preferências</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="timezone">Fuso Horário</label>
+                            <select id="timezone">
+                                <option value="GMT-3">Horário de Brasília (GMT-3)</option>
+                                <option value="GMT-4">Horário do Amazonas (GMT-4)</option>
+                                <option value="GMT-5">Horário do Acre (GMT-5)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="language">Idioma</label>
+                            <select id="language">
+                                <option value="pt">Português</option>
+                                <option value="en">Inglês</option>
+                                <option value="es">Espanhol</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn-cancel">Cancelar</button>
+                    <button class="btn-save">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar eventos do perfil
+        document.addEventListener('DOMContentLoaded', function() {
+            // O script auth.js já inicializa as funcionalidades
+            // Aqui apenas adicionamos manipuladores específicos para esta página
+
+            // Função para simular upload de avatar
+            const uploadAvatarBtn = document.getElementById('uploadAvatar');
+            if (uploadAvatarBtn) {
+                uploadAvatarBtn.addEventListener('click', function() {
+                    taskFlowAuth.showToast('Funcionalidade de upload de avatar será implementada.', 'info');
+                });
+            }
+
+            // Função para remover avatar
+            const removeAvatarBtn = document.getElementById('removeAvatar');
+            if (removeAvatarBtn) {
+                removeAvatarBtn.addEventListener('click', function() {
+                    if (confirm('Tem certeza que deseja remover sua imagem de perfil?')) {
+                        taskFlowAuth.showToast('Imagem de perfil removida.', 'info');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

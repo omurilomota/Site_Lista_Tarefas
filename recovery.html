@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow | Recuperação de Senha</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+    <style>
+        /* Estilos específicos para a tela de recuperação de senha */
+        .password-recovery-container {
+            display: flex;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color), #667eea);
+        }
+        
+        .password-recovery-illustration {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .password-recovery-illustration-content {
+            max-width: 500px;
+        }
+        
+        .password-recovery-illustration i {
+            font-size: 8rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+        
+        .password-recovery-illustration h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .password-recovery-illustration p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .password-recovery-form-container {
+            width: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: var(--bg-primary);
+        }
+        
+        .password-recovery-form {
+            width: 100%;
+            max-width: 350px;
+        }
+        
+        .password-recovery-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .password-recovery-header h1 {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .password-recovery-header p {
+            color: var(--text-secondary);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            font-size: 1rem;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.2);
+        }
+        
+        .recovery-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            margin-bottom: 1rem;
+        }
+        
+        .recovery-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .recovery-back {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .recovery-back a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .recovery-back a:hover {
+            text-decoration: underline;
+        }
+        
+        .recovery-success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: var(--border-radius-md);
+            margin-bottom: 1.5rem;
+            display: none;
+            text-align: center;
+        }
+        
+        .recovery-error {
+            color: var(--danger-color);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        
+        .recovery-step {
+            display: none;
+        }
+        
+        .recovery-step.active {
+            display: block;
+        }
+        
+        .recovery-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .recovery-progress::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--border-color);
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        
+        .recovery-progress-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .recovery-progress-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+        
+        .recovery-progress-circle.active {
+            background-color: var(--primary-color);
+        }
+        
+        .recovery-progress-circle.completed {
+            background-color: var(--success-color);
+        }
+        
+        .recovery-progress-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .recovery-progress-label.active {
+            color: var(--text-primary);
+        }
+        
+        @media (max-width: 992px) {
+            .password-recovery-container {
+                flex-direction: column;
+            }
+            
+            .password-recovery-illustration {
+                padding: 2rem 1rem;
+            }
+            
+            .password-recovery-illustration h2 {
+                font-size: 2rem;
+            }
+            
+            .password-recovery-form-container {
+                width: 100%;
+                min-height: 500px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .password-recovery-form-container {
+                padding: 1.5rem;
+            }
+            
+            .password-recovery-form {
+                max-width: 100%;
+                padding: 0 1rem;
+            }
+        }
+    </style>
+    <script src="js/auth.js"></script>
+</head>
+<body class="light-theme">
+    <div class="password-recovery-container">
+        <div class="password-recovery-illustration">
+            <div class="password-recovery-illustration-content">
+                <i class="fas fa-key"></i>
+                <h2>Recuperação de Senha</h2>
+                <p>Recupere o acesso à sua conta do TaskFlow em alguns passos simples. Siga as instruções para redefinir sua senha.</p>
+            </div>
+        </div>
+        
+        <div class="password-recovery-form-container">
+            <div class="password-recovery-form">
+                <div class="password-recovery-header">
+                    <h1>Redefinir Senha</h1>
+                    <p>Informe seu email para receber as instruções</p>
+                </div>
+                
+                <!-- Barra de progresso -->
+                <div class="recovery-progress">
+                    <div class="recovery-progress-item">
+                        <div class="recovery-progress-circle active">1</div>
+                        <span class="recovery-progress-label active">Email</span>
+                    </div>
+                    <div class="recovery-progress-item">
+                        <div class="recovery-progress-circle">2</div>
+                        <span class="recovery-progress-label">Código</span>
+                    </div>
+                    <div class="recovery-progress-item">
+                        <div class="recovery-progress-circle">3</div>
+                        <span class="recovery-progress-label">Nova Senha</span>
+                    </div>
+                </div>
+                
+                <!-- Passo 1: Email -->
+                <div id="step1" class="recovery-step active">
+                    <div class="form-group">
+                        <label for="recoveryEmail">Email</label>
+                        <input type="email" id="recoveryEmail" placeholder="seu@email.com" required>
+                    </div>
+                    
+                    <div id="recoveryError1" class="recovery-error"></div>
+                    
+                    <button type="button" class="recovery-btn" id="sendRecoveryCode">Enviar código</button>
+                    
+                    <div class="recovery-back">
+                        <p><a href="login.html"><i class="fas fa-arrow-left"></i> Voltar para login</a></p>
+                    </div>
+                </div>
+                
+                <!-- Passo 2: Código de verificação -->
+                <div id="step2" class="recovery-step">
+                    <div class="form-group">
+                        <label for="recoveryCode">Código de verificação</label>
+                        <input type="text" id="recoveryCode" placeholder="Insira o código enviado ao seu email" required maxlength="6">
+                    </div>
+                    
+                    <div id="resendCode" style="text-align: center; margin-bottom: 1.5rem;">
+                        <a href="#" id="resendCodeLink" style="color: var(--primary-color); text-decoration: none; font-size: 0.9rem;">
+                            Reenviar código
+                        </a>
+                    </div>
+                    
+                    <div id="recoveryError2" class="recovery-error"></div>
+                    
+                    <button type="button" class="recovery-btn" id="verifyCode">Verificar código</button>
+                    
+                    <div class="recovery-back">
+                        <p><a href="#" id="backToStep1"><i class="fas fa-arrow-left"></i> Voltar para email</a></p>
+                    </div>
+                </div>
+                
+                <!-- Passo 3: Nova senha -->
+                <div id="step3" class="recovery-step">
+                    <div class="form-group">
+                        <label for="newPassword">Nova senha</label>
+                        <input type="password" id="newPassword" placeholder="••••••••" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmNewPassword">Confirmar nova senha</label>
+                        <input type="password" id="confirmNewPassword" placeholder="••••••••" required>
+                    </div>
+                    
+                    <div id="recoveryError3" class="recovery-error"></div>
+                    
+                    <div id="recoverySuccess" class="recovery-success">
+                        <i class="fas fa-check-circle"></i> Senha redefinida com sucesso! Você pode fazer login agora.
+                    </div>
+                    
+                    <button type="button" class="recovery-btn" id="resetPassword">Redefinir senha</button>
+                    
+                    <div class="recovery-back">
+                        <p><a href="login.html"><i class="fas fa-arrow-left"></i> Voltar para login</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar eventos da recuperação de senha
+        document.addEventListener('DOMContentLoaded', function() {
+            // O script auth.js já inicializa as funcionalidades
+            // Aqui apenas adicionamos manipuladores específicos para esta página
+        });
+    </script>
+</body>
+</html>

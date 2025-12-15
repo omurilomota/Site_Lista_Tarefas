@@ -1871,3 +1871,108 @@ body.modal-open {
 .subtask-action-btn.cancel-subtask:hover {
     background-color: #c62828;
 }
+
+/* Estilos para páginas de autenticação e configurações */
+.auth-container,
+.password-recovery-container,
+.profile-container,
+.settings-container {
+    font-family: 'Inter', sans-serif;
+}
+
+.auth-btn,
+.recovery-btn,
+.security-btn,
+.btn-save,
+.btn-cancel,
+.btn-danger {
+    transition: all var(--transition-fast);
+    border-radius: var(--border-radius-md);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.auth-btn:hover,
+.recovery-btn:hover,
+.security-btn:hover,
+.btn-save:hover,
+.btn-cancel:hover,
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.profile-menu a,
+.settings-menu a {
+    transition: all var(--transition-fast);
+}
+
+.profile-menu a:hover,
+.settings-menu a:hover,
+.profile-menu a.active,
+.settings-menu a.active {
+    transform: translateX(4px);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.2);
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color);
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.profile-sidebar,
+.settings-sidebar {
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.profile-content,
+.settings-content {
+    background-color: var(--bg-secondary);
+}
