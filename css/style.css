@@ -335,6 +335,12 @@ input:checked + .slider:before {
     animation: shimmer 1.5s infinite;
 }
 
+.current-time {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    font-weight: normal;
+}
+
 /* ===== MAIN CONTENT ===== */
 .main-content {
     flex: 1;
@@ -803,6 +809,156 @@ input:checked + .slider:before {
     background-color: var(--danger-color);
 }
 
+/* Subtasks */
+.subtasks-container {
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--border-color);
+    width: 100%;
+}
+
+.subtasks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xs);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.subtask-list {
+    list-style: none;
+    margin-bottom: var(--spacing-sm);
+    padding-left: var(--spacing-md);
+}
+
+.subtask-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 8px;
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 4px;
+    transition: background-color var(--transition-fast);
+}
+
+.subtask-item:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.subtask-item.completed {
+    opacity: 0.7;
+}
+
+.subtask-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.subtask-checkbox:hover {
+    border-color: var(--primary-color);
+}
+
+.subtask-checkbox.checked {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.subtask-checkbox.checked::after {
+    content: '✓';
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.subtask-text {
+    flex: 1;
+    font-size: 0.9rem;
+    word-break: break-word;
+}
+
+.subtask-text.completed {
+    text-decoration: line-through;
+    color: var(--text-tertiary);
+}
+
+.subtask-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.subtask-action-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background-color: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    font-size: 0.8rem;
+}
+
+.subtask-action-btn:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.add-subtask-form {
+    display: flex;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-xs);
+}
+
+.subtask-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    font-size: 0.9rem;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+.subtask-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(26, 54, 93, 0.2);
+}
+
+.add-subtask-btn {
+    padding: 8px 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.add-subtask-btn:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
 .empty-state {
     flex-direction: column;
     text-align: center;
@@ -1133,6 +1289,21 @@ input:checked + .slider:before {
     visibility: visible;
 }
 
+/* Garantir que modais ocultos não sejam visíveis */
+.modal.hidden {
+    display: none !important;
+}
+
+/* Garantir que modais visíveis sejam exibidos corretamente */
+.modal.show {
+    display: flex !important;
+}
+
+/* Prevenir scroll quando modal está aberto */
+body.modal-open {
+    overflow: hidden;
+}
+
 .modal-content {
     background-color: var(--bg-primary);
     border-radius: var(--border-radius-lg);
@@ -1191,30 +1362,59 @@ input:checked + .slider:before {
 
 .shortcuts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: var(--spacing-md);
 }
 
 .shortcut-item {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    justify-content: space-between;
     padding: var(--spacing-md);
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius-md);
     border: 1px solid var(--border-color);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.shortcut-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.shortcut-keys {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: var(--spacing-md);
+    flex-shrink: 0;
 }
 
 .shortcut-item kbd {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    padding: 6px 12px;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 8px 12px;
     border-radius: var(--border-radius-sm);
     font-family: monospace;
     font-weight: bold;
-    min-width: 100px;
+    min-width: auto;
     text-align: center;
-    box-shadow: 0 3px 0 var(--border-color);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shortcut-description {
+    flex: 1;
+    text-align: left;
+    margin-left: var(--spacing-md);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.shortcut-item kbd + kbd {
+    margin-left: 4px;
 }
 
 .about-content {
@@ -1380,6 +1580,62 @@ input:checked + .slider:before {
 
 .fade-in {
     animation: fadeIn 0.5s ease forwards;
+}
+
+/* Formulário de Edição de Tarefa */
+.edit-task-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.form-group label {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px 14px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    transition: all var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.2);
+}
+
+.form-row {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
 }
 
 .slide-in-right {
@@ -1566,4 +1822,52 @@ input:checked + .slider:before {
 .drag-over {
     border: 2px dashed var(--primary-color) !important;
     background-color: rgba(26, 54, 93, 0.05) !important;
+}
+
+/* Estilos para edição inline de subtarefas */
+.edit-subtask-input {
+    flex: 1;
+    padding: 4px 8px;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    font-family: inherit;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+.edit-subtask-input:focus {
+    outline: none;
+    border-color: var(--primary-dark);
+    box-shadow: 0 0 0 3px rgba(109, 93, 252, 0.2);
+}
+
+.inline-edit-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.inline-edit-container .subtask-checkbox {
+    flex-shrink: 0;
+}
+
+.subtask-action-btn.save-subtask {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.subtask-action-btn.save-subtask:hover {
+    background-color: #2f8a5d;
+}
+
+.subtask-action-btn.cancel-subtask {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.subtask-action-btn.cancel-subtask:hover {
+    background-color: #c62828;
 }

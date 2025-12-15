@@ -173,6 +173,18 @@
                             <div class="stat-value" id="highPriorityTasks">0</div>
                             <div class="stat-label">Alta Prioridade</div>
                         </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalSubtasks">0</div>
+                            <div class="stat-label">Total de Subtarefas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="completedSubtasks">0</div>
+                            <div class="stat-label">Subtarefas Completas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="pendingSubtasks">0</div>
+                            <div class="stat-label">Subtarefas Pendentes</div>
+                        </div>
                     </div>
                     
                     <div class="stats-chart">
@@ -250,28 +262,68 @@
                 <div class="modal-body">
                     <div class="shortcuts-grid">
                         <div class="shortcut-item">
-                            <kbd>Enter</kbd>
-                            <span>Adicionar tarefa</span>
+                            <div class="shortcut-keys">
+                                <kbd>Enter</kbd>
+                            </div>
+                            <div class="shortcut-description">
+                                <span>Adicionar tarefa</span>
+                            </div>
                         </div>
                         <div class="shortcut-item">
-                            <kbd>Ctrl</kbd> + <kbd>Enter</kbd>
-                            <span>Tarefa rápida</span>
+                            <div class="shortcut-keys">
+                                <kbd>Ctrl</kbd> + <kbd>Enter</kbd>
+                            </div>
+                            <div class="shortcut-description">
+                                <span>Tarefa rápida (adiciona tarefa aleatória)</span>
+                            </div>
                         </div>
                         <div class="shortcut-item">
-                            <kbd>Delete</kbd>
-                            <span>Remover tarefa selecionada</span>
+                            <div class="shortcut-keys">
+                                <kbd>Delete</kbd>
+                            </div>
+                            <div class="shortcut-description">
+                                <span>Remover tarefa selecionada</span>
+                            </div>
                         </div>
                         <div class="shortcut-item">
-                            <kbd>Espaço</kbd>
-                            <span>Marcar/desmarcar tarefa</span>
+                            <div class="shortcut-keys">
+                                <kbd>Espaço</kbd>
+                            </div>
+                            <div class="shortcut-description">
+                                <span>Marcar/desmarcar tarefa</span>
+                            </div>
                         </div>
                         <div class="shortcut-item">
-                            <kbd>Ctrl</kbd> + <kbd>F</kbd>
-                            <span>Focar na busca</span>
+                            <div class="shortcut-keys">
+                                <kbd>Ctrl</kbd> + <kbd>F</kbd>
+                            </div>
+                            <div class="shortcut-description">
+                                <span>Focar na busca</span>
+                            </div>
                         </div>
                         <div class="shortcut-item">
-                            <kbd>Escape</kbd>
-                            <span>Limpar busca/seleção</span>
+                            <div class="shortcut-keys">
+                                <kbd>Escape</kbd>
+                            </div>
+                            <div class="shortcut-description">
+                                <span>Limpar busca/seleção</span>
+                            </div>
+                        </div>
+                        <div class="shortcut-item">
+                            <div class="shortcut-keys">
+                                <kbd>Ctrl</kbd> + <kbd>A</kbd>
+                            </div>
+                            <div class="shortcut-description">
+                                <span>Selecionar todas as tarefas</span>
+                            </div>
+                        </div>
+                        <div class="shortcut-item">
+                            <div class="shortcut-keys">
+                                <kbd>Ctrl</kbd> + <kbd>D</kbd>
+                            </div>
+                            <div class="shortcut-description">
+                                <span>Limpar tarefas completas</span>
+                            </div>
                         </div>
                     </div>
                 </div>

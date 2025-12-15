@@ -23,6 +23,15 @@ class TaskFlowApp {
         this.setupKeyboardShortcuts();
         this.setupDragAndDrop();
         this.setupReminderChecker();
+
+        // Prevenir que eventos de clique se propagem para os modais
+        document.addEventListener('click', (e) => {
+            // Só fecha modais se clicar fora do conteúdo do modal
+            const modal = e.target.closest('.modal');
+            if (modal && e.target === modal) {
+                this.hideAllModals();
+            }
+        });
     }
     
     cacheElements() {
@@ -65,6 +74,9 @@ class TaskFlowApp {
             completedTasks: document.getElementById('completedTasks'),
             pendingTasks: document.getElementById('pendingTasks'),
             highPriorityTasks: document.getElementById('highPriorityTasks'),
+            totalSubtasks: document.getElementById('totalSubtasks'),
+            completedSubtasks: document.getElementById('completedSubtasks'),
+            pendingSubtasks: document.getElementById('pendingSubtasks'),
             connectionStatus: document.getElementById('connectionStatus'),
             lastSync: document.getElementById('lastSync'),
             saveNotice: document.getElementById('saveNotice'),
@@ -79,8 +91,14 @@ class TaskFlowApp {
         // Adicionar tarefa
         this.elements.addTaskButton.addEventListener('click', () => this.addTask());
         this.elements.taskInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.addTask();
-            if (e.ctrlKey && e.key === 'Enter') this.addQuickTaskFunc();
+            if (e.key === 'Enter' && !e.ctrlKey) {
+                // Apenas Enter (sem Ctrl) adiciona uma tarefa
+                this.addTask();
+            } else if (e.ctrlKey && e.key === 'Enter') {
+                // Ctrl+Enter adiciona uma tarefa rápida
+                e.preventDefault(); // Prevenir o comportamento padrão
+                this.addQuickTaskFunc();
+            }
         });
         
         // Tarefa rápida
@@ -130,13 +148,21 @@ class TaskFlowApp {
         // Modais
         this.elements.keyboardShortcutsBtn.addEventListener('click', () => this.showModal('shortcutsModal'));
         this.elements.aboutBtn.addEventListener('click', () => this.showModal('aboutModal'));
-        
-        // Fechar modais
-        document.querySelectorAll('.modal-close, .modal').forEach(el => {
-            el.addEventListener('click', (e) => {
-                if (e.target === el || e.target.closest('.modal-close')) {
+
+        // Fechar modais - overlay (fundo escuro)
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                // Fechar modal apenas se clicar na overlay (fundo escuro)
+                if (e.target === modal) {
                     this.hideAllModals();
                 }
+            });
+        });
+
+        // Fechar modais ao clicar no botão de fechar
+        document.querySelectorAll('.modal-close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', () => {
+                this.hideAllModals();
             });
         });
         
@@ -175,13 +201,16 @@ class TaskFlowApp {
             reminderTime: this.elements.taskReminderTime.value || null,
             completed: false,
             createdAt: new Date().toISOString(),
-            completedAt: null
+            completedAt: null,
+            subtasks: [] // Array para armazenar subtarefas
         };
         
         this.saveTask(task);
         this.elements.taskInput.value = '';
+        this.elements.taskDueDate.value = '';
+        this.elements.taskReminderTime.value = '';
         this.elements.taskInput.focus();
-        
+
         this.showToast('Tarefa adicionada com sucesso', 'success');
         this.updateUI();
     }
@@ -213,9 +242,15 @@ class TaskFlowApp {
     updateTask(taskId, updates) {
         const tasks = this.getTasks();
         const taskIndex = tasks.findIndex(t => t.id === taskId);
-        
+
         if (taskIndex !== -1) {
-            tasks[taskIndex] = { ...tasks[taskIndex], ...updates };
+            // Preservar subtarefas se existirem
+            const currentSubtasks = tasks[taskIndex].subtasks || [];
+            tasks[taskIndex] = {
+                ...tasks[taskIndex],
+                ...updates,
+                subtasks: updates.subtasks || currentSubtasks // Preservar subtarefas se não forem fornecidas
+            };
             localStorage.setItem('taskflow_tasks', JSON.stringify(tasks));
             this.updateTaskList();
         }
@@ -379,6 +414,34 @@ class TaskFlowApp {
                         ${task.priority === 'high' ? 'Alta' : task.priority === 'medium' ? 'Média' : 'Baixa'} Prioridade
                     </span>
                 </div>
+                ${task.subtasks && task.subtasks.length > 0 ? `
+                <div class="subtasks-container">
+                    <div class="subtasks-header">
+                        <span class="subtasks-title">Subtarefas (${task.subtasks.filter(st => st.completed).length}/${task.subtasks.length})</span>
+                    </div>
+                    <ul class="subtask-list">
+                        ${task.subtasks.map(subtask => `
+                            <li class="subtask-item ${subtask.completed ? 'completed' : ''}" data-subtask-id="${subtask.id}">
+                                <div class="subtask-checkbox ${subtask.completed ? 'checked' : ''}"></div>
+                                <span class="subtask-text ${subtask.completed ? 'completed' : ''}">${this.escapeHtml(subtask.text)}</span>
+                                <div class="subtask-actions">
+                                    <button class="subtask-action-btn edit-subtask" title="Editar subtarefa" data-task-id="${task.id}" data-subtask-id="${subtask.id}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="subtask-action-btn delete-subtask" title="Excluir subtarefa" data-task-id="${task.id}" data-subtask-id="${subtask.id}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>` : ''}
+                <div class="add-subtask-form">
+                    <input type="text" class="subtask-input" placeholder="Adicionar uma subtarefa...">
+                    <button class="add-subtask-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
             </div>
             <div class="task-actions">
                 <button class="task-action-btn edit" title="Editar tarefa">
@@ -389,16 +452,83 @@ class TaskFlowApp {
                 </button>
             </div>
         `;
-        
+
         // Event listeners para os elementos da tarefa
         const checkbox = li.querySelector('.task-checkbox');
         const editBtn = li.querySelector('.edit');
         const deleteBtn = li.querySelector('.delete');
-        
+        const addSubtaskBtn = li.querySelector('.add-subtask-btn');
+        const subtaskInput = li.querySelector('.subtask-input');
+
         checkbox.addEventListener('click', () => this.toggleTaskComplete(task.id));
-        editBtn.addEventListener('click', () => this.editTask(task.id));
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // IMPORTANTE: prevenir propagação
+            this.editTask(task.id);
+        });
         deleteBtn.addEventListener('click', () => this.deleteTask(task.id));
-        
+
+        // Event listeners para subtarefas
+        if (addSubtaskBtn && subtaskInput) {
+            addSubtaskBtn.addEventListener('click', () => {
+                const subtaskText = subtaskInput.value.trim();
+                if (subtaskText) {
+                    this.addSubtask(task.id, subtaskText);
+                    subtaskInput.value = '';
+                }
+            });
+
+            subtaskInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const subtaskText = subtaskInput.value.trim();
+                    if (subtaskText) {
+                        this.addSubtask(task.id, subtaskText);
+                        subtaskInput.value = '';
+                    }
+                }
+            });
+        }
+
+        // Event listeners para subtarefas existentes - usando data-* attributes para segurança
+        const allSubtaskElements = li.querySelectorAll('.subtask-item');
+        allSubtaskElements.forEach((subtaskElement) => {
+            const subtaskDataId = subtaskElement.getAttribute('data-subtask-id');
+            const originalSubtask = task.subtasks.find(st => st.id === subtaskDataId);
+
+            if (originalSubtask) {
+                const subtaskCheckbox = subtaskElement.querySelector('.subtask-checkbox');
+                const editSubtaskBtn = subtaskElement.querySelector('.edit-subtask');
+                const deleteSubtaskBtn = subtaskElement.querySelector('.delete-subtask');
+
+                if (subtaskCheckbox) {
+                    subtaskCheckbox.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.toggleSubtask(task.id, originalSubtask.id);
+                    });
+                }
+
+                if (editSubtaskBtn) {
+                    // Usando arrow function para manter o contexto correto de 'this'
+                    editSubtaskBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Prevenir que o evento afete outros elementos
+                        const taskId = editSubtaskBtn.getAttribute('data-task-id');
+                        const subtaskId = editSubtaskBtn.getAttribute('data-subtask-id');
+                        this.editSubtaskInline(taskId, subtaskId, subtaskElement);
+                    });
+                }
+
+                if (deleteSubtaskBtn) {
+                    deleteSubtaskBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Prevenir que o evento afete outros elementos
+                        const taskId = deleteSubtaskBtn.getAttribute('data-task-id');
+                        const subtaskId = deleteSubtaskBtn.getAttribute('data-subtask-id');
+                        if (confirm('Tem certeza que deseja excluir esta subtarefa?')) {
+                            this.deleteSubtask(taskId, subtaskId);
+                        }
+                    });
+                }
+            }
+        });
+
         return li;
     }
     
@@ -421,16 +551,166 @@ class TaskFlowApp {
     }
     
     editTask(taskId) {
+        console.log('editTask chamado para taskId:', taskId); // DEBUG
+
         const tasks = this.getTasks();
         const task = tasks.find(t => t.id === taskId);
-        
+
         if (task) {
-            const newText = prompt('Editar tarefa:', task.text);
-            if (newText !== null && newText.trim() !== '') {
-                this.updateTask(taskId, { text: newText.trim() });
-                this.showToast('Tarefa atualizada', 'success');
-            }
+            // Criar um modal de edição
+            this.showEditTaskModal(task);
         }
+    }
+
+    showEditTaskModal(task) {
+        // Remover modal anterior se existir
+        const existingModal = document.getElementById('editTaskModal');
+        if (existingModal) existingModal.remove();
+
+        // Criar modal de edição
+        const modal = document.createElement('div');
+        modal.id = 'editTaskModal';
+        modal.className = 'modal show';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-edit"></i> Editar Tarefa</h3>
+                    <button class="modal-close" id="closeEditTaskModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="edit-task-form">
+                        <div class="form-group">
+                            <label for="editTaskText">Texto da Tarefa</label>
+                            <input type="text" id="editTaskText" value="${task.text}" placeholder="O que precisa ser feito?">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editTaskCategory">Categoria</label>
+                                <select id="editTaskCategory">
+                                    <option value="general" ${task.category === 'general' ? 'selected' : ''}>📋 Geral</option>
+                                    <option value="work" ${task.category === 'work' ? 'selected' : ''}>💼 Trabalho</option>
+                                    <option value="personal" ${task.category === 'personal' ? 'selected' : ''}>👤 Pessoal</option>
+                                    <option value="shopping" ${task.category === 'shopping' ? 'selected' : ''}>🛒 Compras</option>
+                                    <option value="health" ${task.category === 'health' ? 'selected' : ''}>🏃 Saúde</option>
+                                    <option value="study" ${task.category === 'study' ? 'selected' : ''}>📚 Estudo</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editTaskPriority">Prioridade</label>
+                                <select id="editTaskPriority">
+                                    <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Baixa</option>
+                                    <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Média</option>
+                                    <option value="high" ${task.priority === 'high' ? 'selected' : ''}>Alta</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editTaskDueDate">Data de Vencimento</label>
+                                <input type="date" id="editTaskDueDate" value="${task.dueDate || ''}">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editTaskReminderTime">Horário do Lembrete</label>
+                                <input type="time" id="editTaskReminderTime" value="${task.reminderTime || ''}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="padding: var(--spacing-lg); border-top: 1px solid var(--border-color);">
+                    <button id="saveTaskChanges" class="add-task-btn" style="margin-right: 10px;">
+                        <i class="fas fa-save"></i> Salvar Alterações
+                    </button>
+                    <button id="cancelEditTask" class="danger-btn">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Adicionar eventos
+        document.getElementById('closeEditTaskModal').addEventListener('click', () => this.closeEditTaskModal());
+        document.getElementById('cancelEditTask').addEventListener('click', () => this.closeEditTaskModal());
+
+        document.getElementById('saveTaskChanges').addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevenir propagação
+
+            const newText = document.getElementById('editTaskText').value.trim();
+            const newCategory = document.getElementById('editTaskCategory').value;
+            const newPriority = document.getElementById('editTaskPriority').value;
+            const newDueDate = document.getElementById('editTaskDueDate').value;
+            const newReminderTime = document.getElementById('editTaskReminderTime').value;
+
+            if (newText === '') {
+                this.showToast('O texto da tarefa não pode estar vazio', 'warning');
+                return;
+            }
+
+            this.updateTask(task.id, {
+                text: newText,
+                category: newCategory,
+                priority: newPriority,
+                dueDate: newDueDate || null,
+                reminderTime: newReminderTime || null
+            });
+
+            this.closeEditTaskModal();
+            this.showToast('Tarefa atualizada com sucesso', 'success');
+        });
+
+        // Fechar ao pressionar ESC
+        const handleEscKey = (e) => {
+            if (e.key === 'Escape') {
+                this.closeEditTaskModal();
+                document.removeEventListener('keydown', handleEscKey);
+            }
+        };
+        document.addEventListener('keydown', handleEscKey);
+
+        // Fechar ao clicar fora do modal
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.closeEditTaskModal();
+            }
+        });
+    }
+
+    closeEditTaskModal() {
+        const modal = document.getElementById('editTaskModal');
+        if (modal) {
+            modal.remove();
+        }
+    }
+
+    saveTaskChanges(taskId) {
+        const newText = document.getElementById('editTaskText').value.trim();
+        const newCategory = document.getElementById('editTaskCategory').value;
+        const newPriority = document.getElementById('editTaskPriority').value;
+        const newDueDate = document.getElementById('editTaskDueDate').value;
+        const newReminderTime = document.getElementById('editTaskReminderTime').value;
+
+        if (newText === '') {
+            this.showToast('O texto da tarefa não pode estar vazio', 'warning');
+            return;
+        }
+
+        this.updateTask(taskId, {
+            text: newText,
+            category: newCategory,
+            priority: newPriority,
+            dueDate: newDueDate || null,
+            reminderTime: newReminderTime || null
+        });
+
+        this.closeEditTaskModal();
+        this.showToast('Tarefa atualizada com sucesso', 'success');
     }
     
     clearCompletedTasks() {
@@ -550,10 +830,18 @@ class TaskFlowApp {
     // ===== ESTATÍSTICAS =====
     
     toggleStatsPanel() {
-        this.elements.statsPanel.classList.toggle('hidden');
-        if (!this.elements.statsPanel.classList.contains('hidden')) {
-            this.updateStats();
-            this.renderChart();
+        try {
+            this.elements.statsPanel.classList.toggle('hidden');
+            if (!this.elements.statsPanel.classList.contains('hidden')) {
+                this.updateStats();
+                this.renderChart();
+            }
+        } catch (error) {
+            console.error('Erro ao alternar painel de estatísticas:', error);
+            // Ocultar o painel em caso de erro para evitar que fique travado
+            if (this.elements.statsPanel) {
+                this.elements.statsPanel.classList.add('hidden');
+            }
         }
     }
     
@@ -563,64 +851,137 @@ class TaskFlowApp {
         const completed = tasks.filter(t => t.completed).length;
         const pending = total - completed;
         const highPriority = tasks.filter(t => t.priority === 'high').length;
-        
+
+        // Contar subtarefas
+        let totalSubtasks = 0;
+        let completedSubtasks = 0;
+
+        tasks.forEach(task => {
+            if (task.subtasks && task.subtasks.length > 0) {
+                task.subtasks.forEach(subtask => {
+                    totalSubtasks++;
+                    if (subtask.completed) {
+                        completedSubtasks++;
+                    }
+                });
+            }
+        });
+
         this.elements.totalTasks.textContent = total;
         this.elements.completedTasks.textContent = completed;
         this.elements.pendingTasks.textContent = pending;
         this.elements.highPriorityTasks.textContent = highPriority;
+
+        // Adicionar estatísticas de subtarefas ao painel de estatísticas
+        if (this.elements.totalSubtasks) {
+            this.elements.totalSubtasks.textContent = totalSubtasks;
+        }
+        if (this.elements.completedSubtasks) {
+            this.elements.completedSubtasks.textContent = completedSubtasks;
+        }
+        if (this.elements.pendingSubtasks) {
+            this.elements.pendingSubtasks.textContent = totalSubtasks - completedSubtasks;
+        }
     }
     
     renderChart() {
-        const tasks = this.getTasks();
-        const ctx = document.getElementById('tasksChart').getContext('2d');
-        
-        // Dados para o gráfico
-        const categories = ['Geral', 'Trabalho', 'Pessoal', 'Compras', 'Saúde', 'Estudo'];
-        const categoryCounts = categories.map(cat => 
-            tasks.filter(t => this.getCategoryName(t.category) === cat).length
-        );
-        
-        // Destruir gráfico anterior se existir
-        if (window.tasksChart) {
-            window.tasksChart.destroy();
-        }
-        
-        // Criar novo gráfico
-        window.tasksChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: categories,
-                datasets: [{
-                    data: categoryCounts,
-                    backgroundColor: [
-                        '#6d5dfc',
-                        '#4fc3f7',
-                        '#ff6b8b',
-                        '#4caf50',
-                        '#ff9800',
-                        '#9c27b0'
-                    ],
-                    borderWidth: 2,
-                    borderColor: 'var(--bg-primary)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: 'var(--text-primary)',
-                            padding: 20,
-                            font: {
-                                family: 'Inter'
+        try {
+            const tasks = this.getTasks();
+            const chartCanvas = document.getElementById('tasksChart');
+
+            // Verificar se o canvas existe antes de tentar criar o gráfico
+            if (!chartCanvas) {
+                console.warn('Canvas do gráfico não encontrado');
+                return;
+            }
+
+            const ctx = chartCanvas.getContext('2d');
+
+            // Verificar se o contexto foi obtido com sucesso
+            if (!ctx) {
+                console.warn('Não foi possível obter o contexto 2D do canvas');
+                return;
+            }
+
+            // Dados para o gráfico
+            const categories = ['Geral', 'Trabalho', 'Pessoal', 'Compras', 'Saúde', 'Estudo'];
+            const categoryCounts = categories.map(cat =>
+                tasks.filter(t => this.getCategoryName(t.category) === cat).length
+            );
+
+            // Contar subtarefas por categoria
+            const subtasksByCategory = {};
+            tasks.forEach(task => {
+                if (task.subtasks && task.subtasks.length > 0) {
+                    const category = this.getCategoryName(task.category);
+                    if (!subtasksByCategory[category]) {
+                        subtasksByCategory[category] = 0;
+                    }
+                    subtasksByCategory[category] += task.subtasks.length;
+                }
+            });
+
+            // Converter em array para exibir no gráfico
+            const subtaskCategoryCounts = categories.map(cat => subtasksByCategory[cat] || 0);
+
+            // Destruir gráfico anterior se existir
+            if (window.tasksChart) {
+                window.tasksChart.destroy();
+            }
+
+            // Calcular total de subtarefas completas e pendentes
+            let completedSubtasks = 0;
+            let pendingSubtasks = 0;
+
+            tasks.forEach(task => {
+                if (task.subtasks && task.subtasks.length > 0) {
+                    task.subtasks.forEach(subtask => {
+                        if (subtask.completed) {
+                            completedSubtasks++;
+                        } else {
+                            pendingSubtasks++;
+                        }
+                    });
+                }
+            });
+
+            // Criar novo gráfico
+            window.tasksChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Tarefas', 'Subtarefas Completas', 'Subtarefas Pendentes'],
+                    datasets: [{
+                        data: [tasks.length, completedSubtasks, pendingSubtasks],
+                        backgroundColor: [
+                            '#6d5dfc',      // Tarefas principais
+                            '#4caf50',      // Subtarefas completas
+                            '#ff9800'       // Subtarefas pendentes
+                        ],
+                        borderWidth: 2,
+                        borderColor: 'var(--bg-primary)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'var(--text-primary)',
+                                padding: 20,
+                                font: {
+                                    family: 'Inter'
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+        } catch (error) {
+            console.error('Erro ao renderizar o gráfico:', error);
+            // Não deixar o erro travar a aplicação
+        }
     }
     
     // ===== PROGRESSO =====
@@ -629,10 +990,17 @@ class TaskFlowApp {
         const tasks = this.getTasks();
         const completed = tasks.filter(t => t.completed).length;
         const total = tasks.length;
-        
+
         const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-        
-        this.elements.progressPercent.textContent = `${percentage}%`;
+
+        // Obter horário atual
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const currentTime = `${hours}:${minutes}`;
+
+        // Atualizar o texto do progresso com o horário
+        this.elements.progressPercent.innerHTML = `${percentage}% <span class="current-time">(${currentTime})</span>`;
         this.elements.progressFill.style.width = `${percentage}%`;
     }
     
@@ -838,16 +1206,49 @@ class TaskFlowApp {
     // ===== MODAIS =====
     
     showModal(modalId) {
-        const modal = document.getElementById(modalId);
-        modal.classList.add('show');
-        document.body.style.overflow = 'hidden';
+        try {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                // Primeiro, esconder todos os outros modais
+                this.hideAllModals();
+
+                // Adicionar classe 'modal-open' ao body para evitar scroll
+                document.body.classList.add('modal-open');
+
+                // Remover a classe 'hidden' e adicionar 'show'
+                modal.classList.remove('hidden');
+
+                // Pequeno delay para garantir a animação
+                setTimeout(() => {
+                    modal.classList.add('show');
+
+                    // Focar no primeiro elemento interativo
+                    const focusable = modal.querySelector('button, input, select, textarea');
+                    if (focusable) {
+                        focusable.focus();
+                    }
+                }, 10);
+            }
+        } catch (error) {
+            console.error(`Erro ao mostrar modal ${modalId}:`, error);
+        }
     }
-    
+
     hideAllModals() {
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.classList.remove('show');
-        });
-        document.body.style.overflow = '';
+        try {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('show');
+                // Adicionar um pequeno delay antes de adicionar 'hidden' para permitir animação
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            });
+
+            // Remover classe 'modal-open' do body
+            document.body.classList.remove('modal-open');
+        } catch (error) {
+            console.error('Erro ao ocultar modais:', error);
+        }
     }
     
     // ===== RESETAR APP =====
@@ -957,6 +1358,79 @@ class TaskFlowApp {
         this.checkReminders();
     }
 
+    // ===== SUBTAREFAS =====
+
+    addSubtask(taskId, subtaskText) {
+        const tasks = this.getTasks();
+        const taskIndex = tasks.findIndex(t => t.id === taskId);
+
+        if (taskIndex !== -1) {
+            const newSubtask = {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9), // Criar ID único
+                text: subtaskText,
+                completed: false,
+                createdAt: new Date().toISOString()
+            };
+
+            tasks[taskIndex].subtasks.push(newSubtask);
+            localStorage.setItem('taskflow_tasks', JSON.stringify(tasks));
+            this.updateTaskList();
+            this.showToast('Subtarefa adicionada com sucesso', 'success');
+        }
+    }
+
+    toggleSubtask(taskId, subtaskId) {
+        const tasks = this.getTasks();
+        const task = tasks.find(t => t.id === taskId);
+
+        if (task) {
+            const subtask = task.subtasks.find(st => st.id === subtaskId);
+            if (subtask) {
+                subtask.completed = !subtask.completed;
+                subtask.completedAt = subtask.completed ? new Date().toISOString() : null;
+
+                localStorage.setItem('taskflow_tasks', JSON.stringify(tasks));
+                this.updateTaskList();
+
+                this.showToast(
+                    subtask.completed ? 'Subtarefa concluída! 🎉' : 'Subtarefa marcada como pendente',
+                    subtask.completed ? 'success' : 'info'
+                );
+            }
+        }
+    }
+
+    deleteSubtask(taskId, subtaskId) {
+        const tasks = this.getTasks();
+        const task = tasks.find(t => t.id === taskId);
+
+        if (task) {
+            task.subtasks = task.subtasks.filter(st => st.id !== subtaskId);
+            localStorage.setItem('taskflow_tasks', JSON.stringify(tasks));
+            this.updateTaskList();
+            this.showToast('Subtarefa removida', 'info');
+        }
+    }
+
+    editSubtask(taskId, subtaskId, newText, newCompleted = null) {
+        const tasks = this.getTasks();
+        const task = tasks.find(t => t.id === taskId);
+
+        if (task) {
+            const subtask = task.subtasks.find(st => st.id === subtaskId);
+            if (subtask) {
+                subtask.text = newText;
+                if (newCompleted !== null) {
+                    subtask.completed = newCompleted;
+                    subtask.completedAt = newCompleted ? new Date().toISOString() : null;
+                }
+                localStorage.setItem('taskflow_tasks', JSON.stringify(tasks));
+                this.updateTaskList();
+                this.showToast('Subtarefa atualizada', 'success');
+            }
+        }
+    }
+
     getCategoryName(categoryKey) {
         const categories = {
             'general': 'Geral',
@@ -969,6 +1443,101 @@ class TaskFlowApp {
         return categories[categoryKey] || 'Geral';
     }
     
+    editSubtaskInline(taskId, subtaskId, subtaskElement) {
+        const tasks = this.getTasks();
+        const task = tasks.find(t => t.id === taskId);
+        const subtask = task ? task.subtasks.find(st => st.id === subtaskId) : null;
+
+        if (!subtask) {
+            console.error('Subtarefa não encontrada');
+            return;
+        }
+
+        // Substituir texto por input de edição
+        const subtaskTextElement = subtaskElement.querySelector('.subtask-text');
+        const currentText = subtask.text;
+
+        // Criar container para edição inline
+        const editContainer = document.createElement('div');
+        editContainer.className = 'inline-edit-container';
+
+        // Manter o checkbox
+        const checkbox = subtaskElement.querySelector('.subtask-checkbox').cloneNode(true);
+        checkbox.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleSubtask(taskId, subtaskId);
+        });
+
+        // Input de edição
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'edit-subtask-input';
+        input.value = currentText;
+
+        // Botões de ação
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'subtask-actions';
+
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'subtask-action-btn save-subtask';
+        saveBtn.innerHTML = '<i class="fas fa-check"></i>';
+        saveBtn.title = 'Salvar';
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'subtask-action-btn cancel-subtask';
+        cancelBtn.innerHTML = '<i class="fas fa-times"></i>';
+        cancelBtn.title = 'Cancelar';
+
+        actionsDiv.appendChild(saveBtn);
+        actionsDiv.appendChild(cancelBtn);
+
+        // Montar container
+        editContainer.appendChild(checkbox);
+        editContainer.appendChild(input);
+        editContainer.appendChild(actionsDiv);
+
+        // Substituir o conteúdo
+        subtaskElement.innerHTML = '';
+        subtaskElement.appendChild(editContainer);
+
+        // Focar no input
+        input.focus();
+        input.select();
+
+        // Função para salvar
+        const saveChanges = () => {
+            const newText = input.value.trim();
+            if (newText && newText !== currentText) {
+                this.editSubtask(taskId, subtaskId, newText);
+            } else {
+                // Restaurar visualização original
+                this.updateTaskList();
+            }
+        };
+
+        // Função para cancelar
+        const cancelEdit = () => {
+            this.updateTaskList();
+        };
+
+        // Event listeners
+        saveBtn.addEventListener('click', saveChanges);
+        cancelBtn.addEventListener('click', cancelEdit);
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                saveChanges();
+            } else if (e.key === 'Escape') {
+                cancelEdit();
+            }
+        });
+
+        // Salvar ao perder foco
+        input.addEventListener('blur', () => {
+            setTimeout(saveChanges, 100);
+        });
+    }
+
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
